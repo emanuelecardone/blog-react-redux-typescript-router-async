@@ -4,7 +4,6 @@ import { selectAllPosts, getPostStatus, getPostsError, fetchPosts, Status } from
 import { AppDispatch } from '../../app/store';
 import { useEffect, useRef } from 'react';
 import PostsExcept from './PostsExcept';
-import { is } from 'immer/dist/internal';
 
 const PostsList = () => {
 

@@ -3,7 +3,6 @@ import { createSlice, nanoid, PayloadAction, createAsyncThunk } from "@reduxjs/t
 import { RootState } from "../../app/store";
 import axios from "axios";
 import {sub} from "date-fns";
-import { type } from "@testing-library/user-event/dist/type";
 
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts';
 
