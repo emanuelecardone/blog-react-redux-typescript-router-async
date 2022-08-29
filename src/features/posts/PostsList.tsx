@@ -1,37 +1,45 @@
 import { useSelector, useDispatch } from 'react-redux'
 // Import della selezione di tutti i post
-import { selectAllPosts } from './postsSlice'
-import PostAuthor from './PostAuthor';
-import TimeAgo from './TimeAgo';
-import ReactionButtons from './ReactionButtons';
+import { selectAllPosts, getPostStatus, getPostsError, fetchPosts, Status } from './postsSlice';
+import { AppDispatch } from '../../app/store';
+import { useEffect, useRef } from 'react';
+import PostsExcept from './PostsExcept';
+import { is } from 'immer/dist/internal';
 
 const PostsList = () => {
 
+    const dispatch = useDispatch<AppDispatch>();
+
     // Legata la selezione di tutti i post
     const posts = useSelector(selectAllPosts);
+    const postsStatus = useSelector(getPostStatus);
+    const error = useSelector(getPostsError);
 
-    // Ordine posts in base a date
-    const orderedPosts = posts.slice().sort((a,b) => b.date.localeCompare(a.date));
+    const isMounted = useRef(false);
 
-    const renderedPosts = orderedPosts.map(post => (
-        <article key={post.id} className='post'>
-            <h3>{post.title}</h3>
-            <p>{post.content.substring(0, 100)}</p>
+    useEffect(() => {
+        if(postsStatus === 'idle' && !isMounted.current){
+            dispatch(fetchPosts());
+            isMounted.current = true;
+        }
+    }, [postsStatus, dispatch])
 
-            <p className='post-credit'>
-                <PostAuthor userId={post.userId} />,
-                <TimeAgo timeStamp={post.date} />
-            </p>
-
-            <ReactionButtons post={post} />
-        </article>
-    ));
+    let content;
+    if (postsStatus === 'loading'){
+        content = <p>"Loading..."</p>;
+    } else if (postsStatus === Status.SUCCEDED){
+        const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date));
+        content = orderedPosts.map(post => <PostsExcept key={post.id} post={post} />)
+    } else if (postsStatus === 'failed') {
+        content = 'error';
+        console.log(error);
+    }
 
     return (
         <section className='posts-section pt-3'>
             <h2 className='text-center'>Posts</h2>
             <div className='posts-wrapper w-50 mx-auto p-1'>
-                {renderedPosts}
+                {content}
             </div>
         </section>
     );

@@ -7,7 +7,7 @@ type Props = {
     post: {
         id: string; 
         title: string; 
-        content: string;
+        body: string;
         userId: string;
         date: string;
         reactions: {
@@ -43,7 +43,7 @@ const ReactionButtons = ({post}: Props) => {
             <button
                 key={name}
                 type="button"
-                className="reactionButton mx-1"
+                className="reactionButton mx-1 px-1"
                 onClick={() =>
                     dispatch(reactionAdded({ postId: post.id, reaction: name}))
                 }
