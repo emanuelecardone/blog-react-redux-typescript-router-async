@@ -3,7 +3,7 @@ import { selectAllUsers } from "../users/usersSlice";
 import React from 'react'
 
 type Props = {
-    userId: string
+    userId: string | number
 }
 
 const PostAuthor = ({userId}: Props) => {

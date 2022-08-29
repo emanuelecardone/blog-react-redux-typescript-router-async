@@ -18,7 +18,7 @@ type Post = {
     id: string; 
     title: string; 
     body: string;
-    userId: string;
+    userId: string | number;
     date: string;
     reactions: Reactions;
 }
@@ -26,7 +26,7 @@ type Post = {
 type InitialPost = {
     title: string;
     body: string;
-    userId: string;
+    userId: string | number;
 }
 
 // Custom type per payload action
@@ -58,38 +58,19 @@ const initialState: InitialState = {
     error: null
 } 
 
-// Fetch per prendere i post
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-    try {
-
-        const response = await axios.get(POSTS_URL);
-        return [...response.data] as Post[];
-
-    } catch(err: unknown){
-
-        // Runtime check
-        if(typeof err === 'string'){
-            return err;
-        } else if(err instanceof Error) {
-            return err.message;
-        }
-    }
-
+// Fetch per prendere i post (<Post[]> è il return della funzione)
+export const fetchPosts = createAsyncThunk<Post[]>('posts/fetchPosts', async () => {
+    const response = await axios.get(POSTS_URL);
+    const data: Post[] = response.data;
+    return [...data];
 })
 
+// Non serve il <returnType> altrimenti va in conflitto col parametro initialPost
+// Verrà poi specificata la PayloadAction nell'extraReducer
 export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost: InitialPost) => {
-    try {
-
-        const response = await axios.post(POSTS_URL, initialPost);
-        return response.data as Post[];
-
-    } catch(err: unknown) {
-        if(typeof err === 'string'){
-            return err;
-        } else if (err instanceof Error){
-            return err.message;
-        }
-    }
+    const response = await axios.post(POSTS_URL, initialPost);
+    const data: Post = response.data;
+    return {...data};
 });
 
 // Export slice (oggetto che ha un nome, uno state iniziale, e i reducers che compieranno varie azioni)
@@ -106,7 +87,7 @@ const postsSlice = createSlice({
                     // in tutti gli altri file non-slice però si deve ancora usare useState o l'hook che fa a quel caso
                 state.posts.push(action.payload);
             },
-            prepare(title: string, body: string, userId: string){
+            prepare(title: string, body: string, userId: string | number){
                 return {
                     payload: {
                         id: nanoid(),
@@ -139,12 +120,13 @@ const postsSlice = createSlice({
             .addCase(fetchPosts.pending, (state, action) => {
                 state.status = Status.LOADING;
             })
-            .addCase(fetchPosts.fulfilled, (state, action: PayloadAction<any>) => {
+            .addCase(fetchPosts.fulfilled, (state, action) => {
                 state.status = Status.SUCCEDED;
                 // Data e reazioni
                 let min = 1;
                 const loadedPosts = action.payload.map((post: Post) => {
                     post.date = sub(new Date(), {minutes: min++}).toISOString();
+                    post.userId = post.userId
                     post.reactions = {
                         thumbsUp: 0,
                         wow: 0,
@@ -163,8 +145,8 @@ const postsSlice = createSlice({
                 state.error = action.error.message;
             })
             // Case per il nuovo post
-            .addCase(addNewPost.fulfilled, (state, action: PayloadAction<any>) => {
-
+            .addCase(addNewPost.fulfilled, (state, action: PayloadAction<Post>) => {
+                
                 // Fix per api post id non accurati
                 // Assegnazione id manuale (non sarebbe necessaria se l'api ritornasse id accurati)
                 const sortedPosts = state.posts.sort((a: Post, b: Post) => {

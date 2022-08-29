@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../app/store';
-import { addNewPost } from './postsSlice';
+import { addNewPost, Status } from './postsSlice';
 import { selectAllUsers } from '../users/usersSlice';
 
 const AddPostForm = () => {
@@ -26,7 +26,7 @@ const AddPostForm = () => {
     }
 
     // Controllo validità di tutte e 3 i campi e status idle
-    const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle';
+    const canSave = [title, content, userId].every(Boolean) && addRequestStatus === Status.IDLE;
 
     // Save post modificato
     const savePost = (e: React.FormEvent) => {
@@ -42,7 +42,7 @@ const AddPostForm = () => {
             } catch(err){
                 console.error('Failed to save the post', err);
             } finally {
-                setAddRequestStatus('idle');
+                setAddRequestStatus(Status.IDLE);
             }
         }
     }
