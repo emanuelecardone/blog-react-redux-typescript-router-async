@@ -42,7 +42,8 @@ export enum Status {
     IDLE = 'idle',
     LOADING = 'loading',
     SUCCEDED = 'succeded',
-    FAILED = 'failed'
+    FAILED = 'failed',
+    PENDING = 'pending'
 }
 
 type InitialState = {

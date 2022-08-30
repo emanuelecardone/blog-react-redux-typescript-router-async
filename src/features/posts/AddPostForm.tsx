@@ -9,7 +9,7 @@ const AddPostForm = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [userId, setuserId] = useState('');
-    const [addRequestStatus, setAddRequestStatus] = useState('idle');
+    const [addRequestStatus, setAddRequestStatus] = useState(Status.IDLE);
 
     const users = useSelector(selectAllUsers);
 
@@ -33,7 +33,7 @@ const AddPostForm = () => {
         e.preventDefault();
         if(canSave){
             try {
-                setAddRequestStatus('pending');
+                setAddRequestStatus(Status.PENDING);
                 // unwrap() è di redux e ritorna un payload.action o lancia un errore se è rejected
                 dispatch(addNewPost({title, body: content, userId})).unwrap();
                 setTitle('');
