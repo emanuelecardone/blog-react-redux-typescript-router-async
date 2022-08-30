@@ -1,6 +1,7 @@
 import PostAuthor from './PostAuthor';
 import TimeAgo from './TimeAgo';
 import ReactionButtons from './ReactionButtons';
+import React from 'react';
 // ROUTER
 import { Link } from 'react-router-dom'
 
@@ -42,4 +43,6 @@ const PostsExcept = ({post}: Props) => {
     )
 }
 
-export default PostsExcept
+// Il memo() fa sì che viene reindirizzato il componente solo al cambiare delle props
+// Esportandolo come memo in questo modo si evita di dover tipizzare il componente e di lasciarlo come const senza doverlo riassegnare
+export default React.memo(PostsExcept); 

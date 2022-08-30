@@ -1,5 +1,5 @@
 // nanoid è uno strumento di redux toolkit per generare id random
-import { createSlice, nanoid, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, nanoid, PayloadAction, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import axios from "axios";
 import {sub} from "date-fns";
@@ -65,13 +65,16 @@ type InitialState = {
     posts: Post[];
     status: Status;
     error: unknown | Error;
+    count: number;
 }
 
 // State iniziale (simile al reducer)
 const initialState: InitialState = {
     posts: [],
     status: Status.IDLE, // 'idle' | 'loading' | 'succeded' | 'failed'
-    error: null
+    error: null,
+    // Il count è solo per testare le ottimizzazioni ma è inutile per il blog
+    count: 0
 } 
 
 // Fetch per prendere i post (<Post[]> è il return della funzione)
@@ -106,6 +109,7 @@ export const deletePost = createAsyncThunk<InitialDelete | string, InitialDelete
 });
 
 // Export slice (oggetto che ha un nome, uno state iniziale, e i reducers che compieranno varie azioni)
+// i reducer e extraReducer qui sotto saranno runnati SOLO nel createSlice in questo caso postsSlice
 const postsSlice = createSlice({
     name: 'posts',
     initialState,
@@ -144,6 +148,10 @@ const postsSlice = createSlice({
             if(existingPost){
                 existingPost.reactions[reaction]++;
             }
+        },
+        // Non prende nessuna action in quanto agisce sul count dello state senza bisogno di parametri
+        increaseCount(state){
+            state.count = state.count +1;
         }
     },
     extraReducers(builder){
@@ -238,14 +246,30 @@ export const selectAllPosts = (state: RootState) => state.posts.posts;
 export const getPostStatus = (state: RootState) => state.posts.status;
 export const getPostsError = (state: RootState) => state.posts.error;
 
+// Selettore per il test count (si deve far riferimento a state.posts perché i reducers avvengono SOLO in postsSlice altrimenti bisogna creare un altro slice)
+export const selectCount = (state: RootState) => state.posts.count;
+
 export const selectPostById = (state: RootState, postId: number | string) => state.posts.posts.find(post => post.id === postId);
+
+// Spiegazione sul createSelector su appunti o documentazione
+// In breve: prende una inputSelector e solo se questa cambia avviene la resultFunction
+    // il primo inputSelector ritorna ciò che è il primo parametro della resultFunction, il secondo ritorna il secondo parametro e così via se ci fossero altri selettori
+export const selectPostsByUser = createSelector(
+    // inputSelectors (come array)
+    [
+        selectAllPosts, 
+        (state, userId) => userId
+    ],
+    // resultFunction
+    (posts, userId) => posts.filter(post => post.userId === userId)
+);
 
 // Actions è la keyword per esportare le possibili azioni
 // Quando si scrive questa funzione postAdded e si crea,
    // slice genera in automatico un'azione "creator function" con lo stesso nome della funzione che adda i post
 // Quindi si sta esportando questa azione creator function che è creata automaticamente,
     // ed è per questo che sopra non si vede la creazione postSlice.action, è automaticamente creata
-   export const { postAdded, reactionAdded } = postsSlice.actions;
+   export const { postAdded, reactionAdded, increaseCount } = postsSlice.actions;
 
 // Export del reducer
 export default postsSlice.reducer;

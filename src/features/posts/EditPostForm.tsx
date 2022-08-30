@@ -25,7 +25,7 @@ const EditPostForm = () => {
 
     if(!post){
         return (
-            <section className="post-not-found w-100 h-100">
+            <section className="post-not-found w-100 h-100 d-flex justify-content-center align-items-center">
                 <h2>Post not found!</h2>
             </section>
         );
@@ -38,7 +38,7 @@ const EditPostForm = () => {
         setContent(e.target.value);
     }
     const onAuthorChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setuserId(e.target.value);
+        setuserId(Number(e.target.value));
     }
 
     // Se si dichiarano alcune variabili come possibili undefined (useState post?.body etc) non si può usare [].every(Boolean)
