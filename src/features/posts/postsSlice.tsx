@@ -126,7 +126,6 @@ const postsSlice = createSlice({
                 let min = 1;
                 const loadedPosts = action.payload.map((post: Post) => {
                     post.date = sub(new Date(), {minutes: min++}).toISOString();
-                    post.userId = post.userId
                     post.reactions = {
                         thumbsUp: 0,
                         wow: 0,
