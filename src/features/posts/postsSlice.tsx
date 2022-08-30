@@ -14,7 +14,7 @@ export type Reactions = {
     coffee: number;
 }
 
-type Post = {
+export type Post = {
     id: string; 
     title: string; 
     body: string;
@@ -23,10 +23,25 @@ type Post = {
     reactions: Reactions;
 }
 
+// Aggiunta post
 type InitialPost = {
     title: string;
     body: string;
     userId: string | number;
+}
+
+// Modifica post
+type InitialEdit = {
+    id: string;
+    title: string;
+    body: string;
+    userId: string | number;
+    reactions: Reactions;
+}
+
+// Delete post 
+type InitialDelete = {
+    id: string;
 }
 
 // Custom type per payload action
@@ -71,6 +86,23 @@ export const addNewPost = createAsyncThunk<Post, InitialPost>('posts/addNewPost'
     const response = await axios.post(POSTS_URL, initialPost);
     const data: Post = response.data;
     return {...data};
+});
+
+// Update post (il thunk ritorna un post e prende initialEdit come param)
+export const updatePost = createAsyncThunk<Post, InitialEdit>('posts/updatePost', async (initialPost) => {
+    const { id } = initialPost; 
+    const response = await axios.put(`${POSTS_URL}/${id}`, initialPost);
+    const data: Post = response.data;
+    return {...data};
+});
+
+// Delete post (ritorna l'oggetto stesso oppure una stringa)
+export const deletePost = createAsyncThunk<InitialDelete | string, InitialDelete>('post/deletePost', async (initialPost) => {
+    const { id } = initialPost;
+    const response = await axios.delete(`${POSTS_URL}/${id}`);
+    // json placeholder con le request delete non ritorna l'id come dovrebbe fare una rest api, quindi si ritorna l'oggetto stesso in questo caso
+    if(response?.status === 200) return initialPost;
+    return `${response?.status}: ${response?.statusText}`;
 });
 
 // Export slice (oggetto che ha un nome, uno state iniziale, e i reducers che compieranno varie azioni)
@@ -166,6 +198,35 @@ const postsSlice = createSlice({
                 }
                 state.posts.push(action.payload);
             })
+            // Case per edit post
+            .addCase(updatePost.fulfilled, (state, action) => {
+                // Se il payload non ha alcun id allora non verrà completato l'update
+                if(!action.payload?.id){
+                    console.log('Update could not complete');
+                    console.log(action.payload);
+                    return;
+                }
+                const { id } = action.payload;
+                action.payload.date = new Date().toISOString();
+                const posts = state.posts.filter(post => post.id !== id);
+                state.posts = [...posts, action.payload];
+            })
+            .addCase(deletePost.fulfilled, (state,action) => {
+                // Controllo runtime per debug nel caso si torni la stringa con il codice status
+                if(typeof action.payload !== 'string'){
+                    if(!action.payload?.id){
+                        console.log('Delete could not complete');
+                        console.log(action.payload);
+                        return;
+                    }
+                    const { id } = action.payload;
+                    const posts = state.posts.filter(post => post.id !== id);
+                    // Non si usa lo spread perché non si vuole più quel post anche nell'array originale
+                    state.posts = posts;
+                } else{
+                    console.log(action.payload);
+                }
+            });
     }
 });
 
@@ -176,6 +237,8 @@ const postsSlice = createSlice({
 export const selectAllPosts = (state: RootState) => state.posts.posts;
 export const getPostStatus = (state: RootState) => state.posts.status;
 export const getPostsError = (state: RootState) => state.posts.error;
+
+export const selectPostById = (state: RootState, postId: number | string) => state.posts.posts.find(post => post.id === postId);
 
 // Actions è la keyword per esportare le possibili azioni
 // Quando si scrive questa funzione postAdded e si crea,

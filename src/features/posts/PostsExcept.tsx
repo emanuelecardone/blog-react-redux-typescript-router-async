@@ -1,6 +1,8 @@
 import PostAuthor from './PostAuthor';
 import TimeAgo from './TimeAgo';
 import ReactionButtons from './ReactionButtons';
+// ROUTER
+import { Link } from 'react-router-dom'
 
 type Props = {
     post: {
@@ -24,9 +26,13 @@ const PostsExcept = ({post}: Props) => {
         <article className='post'>
             <h3>{post.title}</h3>
             {/* L'api ha il suo content in .body, non in .content come nella versione static */}
-            <p>{post.body.substring(0, 100)}</p>
+            <p className='except'>{post.body.substring(0, 75)}</p>
 
             <p className='post-credit'>
+                {/* Link router */}
+                <Link to={`post/${post.id}`} className="me-1" style={{'color': 'cyan', 'textDecoration': 'none', 'display': 'block'}}>
+                    View this post
+                </Link>
                 <PostAuthor userId={post.userId} />,
                 <TimeAgo timeStamp={post.date} />
             </p>

@@ -35,12 +35,14 @@ const PostsList = () => {
     }
 
     return (
-        <section className='posts-section pt-3'>
+        <>
             <h2 className='text-center'>Posts</h2>
-            <div className='posts-wrapper w-50 mx-auto p-1'>
-                {content}
-            </div>
-        </section>
+            <section className='posts-section pt-3 border border-2 border-white'>
+                <div className='posts-wrapper w-75 mx-auto p-1'>
+                    {content}
+                </div>
+            </section>
+        </>
     );
 }
 
