@@ -66,9 +66,8 @@ export const fetchPosts = createAsyncThunk<Post[]>('posts/fetchPosts', async () 
     return [...data];
 })
 
-// Non serve il <returnType> altrimenti va in conflitto col parametro initialPost
-// Verrà poi specificata la PayloadAction nell'extraReducer
-export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost: InitialPost) => {
+// Quando c'è un parametro va inserito per forza oltre al tipo di ritorno, il tipo del primo argomento che riceve la funzione (initialPost)
+export const addNewPost = createAsyncThunk<Post, InitialPost>('posts/addNewPost', async (initialPost) => {
     const response = await axios.post(POSTS_URL, initialPost);
     const data: Post = response.data;
     return {...data};
@@ -145,7 +144,7 @@ const postsSlice = createSlice({
                 state.error = action.error.message;
             })
             // Case per il nuovo post
-            .addCase(addNewPost.fulfilled, (state, action: PayloadAction<Post>) => {
+            .addCase(addNewPost.fulfilled, (state, action) => {
                 
                 // Fix per api post id non accurati
                 // Assegnazione id manuale (non sarebbe necessaria se l'api ritornasse id accurati)
