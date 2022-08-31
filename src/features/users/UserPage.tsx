@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { selectUserById } from "./usersSlice";
-import { selectAllPosts, selectPostsByUser } from "../posts/postsSlice";
+import { Post, selectAllPosts, selectPostsByUser } from "../posts/postsSlice";
 import { Link, useParams } from "react-router-dom";
 import { RootState } from "../../app/store";
 
@@ -11,7 +11,9 @@ const UserPage = () => {
 
     const postsForUser = useSelector((state: RootState) => selectPostsByUser(state, Number(userId)));
 
-    const postTitles = postsForUser.map(post => (
+    const orderedPosts = postsForUser.slice().sort((a, b) => b.date.localeCompare(a.date));
+
+    const postTitles = orderedPosts.map(post => (
         <li key={post.id}>
             <Link to={`/post/${post.id}`} className='text-white' style={{'textDecoration': 'none'}}>{post.title}</Link>
         </li>
