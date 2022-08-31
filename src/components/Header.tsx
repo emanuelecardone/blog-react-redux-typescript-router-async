@@ -19,7 +19,7 @@ const Header = () => {
                 </ul>
             </nav>
             {/* Test counter */}
-            <div className="count-box d-flex flex-column justify-content-center align-items-center position-absolute" style={{'color': 'cyan', 'top': '10px', 'right': '10px'}}>
+            <div className="count-box flex-column justify-content-center align-items-center position-absolute" style={{'color': 'cyan', 'top': '10px', 'right': '10px'}}>
                 <span className="text-center">This is an optimization test<br/> Ignore this counter</span>
                 <button
                     type="button"
